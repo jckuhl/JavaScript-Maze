@@ -1,4 +1,7 @@
 (function() {
+
+    "use strict"
+
     const maze = document.querySelector('.grid');
     const squares = []
     // for testing add 51, 92, 93 (blocking intersections)
@@ -12,8 +15,9 @@
         61, 63, 65, 67, 68, 69,
         70, 71, 73, 77, 79,
         83, 84, 85, 86, 87, 89,
-        90, 91, 99]
-    const START = 80;
+        90, 91, 99
+    ];
+    const START = 0;
     const END = 19;
 
     // build the maze
@@ -70,15 +74,15 @@
             return x >= max - width && x < max;
         }
 
-        function applyClass(cssClass, position) {
-            if(position !== start && position !== end) {
-                squares[position].classList.add(cssClass);
+        function applyClass(cssClass, x) {
+            if(x !== start && x !== end) {
+                squares[x].classList.add(cssClass);
             }
         }
 
         let current = start;
         const used = []
-        let intersections = [];
+        const intersections = [];
         while(current !== end) {
             let keys = Object.keys(directions);
 
@@ -97,10 +101,10 @@
             }
 
             //find the available squares from the current square
-            availableSquares = [];
+            let availableSquares = [];
             keys.forEach((key)=> availableSquares.push(directions[key](current)));
-            availableSquares = availableSquares.filter((position)=> {
-                return !squares[position].classList.contains('wall') && !used.includes(position);
+            availableSquares = availableSquares.filter((square)=> {
+                return !squares[square].classList.contains('wall') && !used.includes(square);
             });
 
             if(availableSquares.length === 1) {
@@ -165,8 +169,8 @@
                 console.log(nextSquare)
                 if(nextSquare) {
                     used.push(current);
-                    current = nextSquare;
                     applyClass('path', current);
+                    current = nextSquare;
                 } else {
                     let temp = current;
                     current = availableSquares[random(availableSquares.length)];
@@ -181,7 +185,7 @@
                     break;
                 }
                 let intersection = intersections.pop();
-                let invalids = used.slice(used.indexOf(intersection));
+                let invalids = used.slice(used.indexOf(intersection));  // minus 1?
                 invalids.forEach(invalid => squares[invalid].classList.add('invalid'));
                 current = intersection;
             }
@@ -193,6 +197,7 @@
     document.getElementById('clear').addEventListener('click', ()=> {
         squares.filter(square => !square.classList.contains('wall')).forEach(square=> {
             square.classList.remove('path');
+            square.classList.remove('invalid');
         });
     });
     //solve(START, END)
