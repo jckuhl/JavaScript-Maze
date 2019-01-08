@@ -1,0 +1,3 @@
+# Maze Solver
+
+Solves a maze by brute force.  It works its way forward from the start, checking each available direction.  If it comes to an intersection, it tries to find an optimal path by going in the direction of the end point.  If it can't do that (due to earlier process of elimination), it'll simply go a random direction.  If it ends up in a dead end, it will back track and try another route.
