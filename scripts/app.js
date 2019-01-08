@@ -8,11 +8,11 @@
         21, 22, 24, 25, 26, 27, 28, 29,
         31, 32, 39,
         41, 42, 43, 44, 45, 46, 47, 49,
-        51, 55, 59,
+        55, 59,
         61, 63, 65, 67, 68, 69,
         70, 71, 73, 77, 79,
         83, 84, 85, 86, 87, 89,
-        90, 91, 92, 93, 99]
+        90, 91, 99]
     const START = 80;
     const END = 19;
 
@@ -33,40 +33,53 @@
         maze.appendChild(square);
     }
 
-    function leftEdge(x, width) {
-        return x % width == 0;
-    }
-
-    function rightEdge(x, width) {
-        return (x + 1) % width == 0;
-    }
-
-    function topEdge(x, width) {
-        return x >= 0 && x <= width - 1;
-    }
-
-    function bottomEdge(x, width, max) {
-        return x >= max - width && x < max;
-    }
-
     // solve the maze
     function solve(start, end) {
         const directions = {
-            // upleft: (x)=> x - 10 - 1,
             up: (x)=> x - 10,
-            // upright: (x)=> x - 10 + 1,
             right: (x)=> x + 1,
-            // downright: (x)=> x + 10 + 1,
             down: (x)=> x + 10,
-            // downleft: (x)=> x + 10 - 1,
             left: (x)=> x - 1
         };
 
+        function random(max, min=0) {
+            return Math.floor(Math.random() * (max - min)) + min;
+        }
+
+        function getColumn(x, width) {
+            return x % width;
+        }
+
+        function getRow(x, width) {
+            return Math.floor(x / width);
+        }
+
+        function leftEdge(x, width) {
+            return x % width == 0;
+        }
+    
+        function rightEdge(x, width) {
+            return (x + 1) % width == 0;
+        }
+    
+        function topEdge(x, width) {
+            return x >= 0 && x <= width - 1;
+        }
+    
+        function bottomEdge(x, width, max) {
+            return x >= max - width && x < max;
+        }
+
+        function applyClass(cssClass, position) {
+            if(position !== start && position !== end) {
+                squares[position].classList.add(cssClass);
+            }
+        }
+
         let current = start;
-        let counter = 0;
         const used = []
-        while(counter < 35) {
-            console.log("current: ", current);
+        let intersection = -1;
+        while(current !== end) {
             let keys = Object.keys(directions);
 
             // eliminate directions that go off the maze
@@ -89,22 +102,79 @@
             availableSquares = availableSquares.filter((position)=> {
                 return !squares[position].classList.contains('wall') && !used.includes(position);
             });
-            console.log(availableSquares);
+
             if(availableSquares.length === 1) {
-                if(current !== start && current !== end) {
-                    squares[current].classList.add('path');
-                }
+                applyClass('path', current)
                 used.push(current);
                 current = availableSquares[0];
-            }
-            counter += 1;
-            if(current === end) {
+            } else if(availableSquares.length > 1) {
+                applyClass('path', current);
+                intersection = current;
+                let nextSquare;
+                // 1. if end is up and to the left
+                if(getRow(current) > getRow(end) && getColumn(current) < getColumn(end)) {
+                    nextSquare = availableSquares.find((square)=> {
+                        return position - square === 10 || position - square === 1;
+                    });
+                // 2. if end is on the same row and to the left
+                } else if(getRow(current) === getRow(end) && getColumn(current) < getColumn(end)) {
+                    nextSquare = availableSquares.find((square)=> {
+                        return position - square === 1;
+                    });
+                // 3. if end is down and to the left
+                } else if(getRow(current) < getRow(end) && getColumn(current) < getColumn(end)) {
+                    nextSquare = availableSquares.find((square)=> {
+                        return position - square === -10 || position - square === 1;
+                    });
+                // 4. if end is down and in the same column
+                } else if(getRow(current) < getRow(end) && getColumn(current) === getColumn(end)) {
+                    nextSquare = availableSquares.find((square)=> {
+                        return position - square === 10;
+                    });
+                // 5. if down and to the right
+                } else if(getRow(current) < getRow(end) && getColumn(current) > getColumn(end)) {
+                    nextSquare = availableSquares.find((square)=> {
+                        return position - square === 10 || position - square === -1;
+                    });
+                // 6. if same row and to the right
+                } else if(getRow(current) === getRow(end) && getColumn(current) > getColumn(end)) {
+                    nextSquare = availableSquares.find((square)=> {
+                        return position - square === -1;
+                    });
+                // 7. if up and to the right
+                } else if(getRow(current) > getRow(end) && getColumn(current) > getColumn(end)) {
+                    nextSquare = availableSquares.find((square)=> {
+                        return position - square === -10 || position - square === -1;
+                    });
+                // 8. if up and same column
+                } else if(getRow(current) > getRow(end) && getColumn(current) === getColumn(end)) {
+                    nextSquare = availableSquares.find((square)=> {
+                        return position - square === -10;
+                    });
+                }
+
+                // if an optimal square was found
+                console.log(nextSquare)
+                if(nextSquare) {
+                    current = nextSquare;
+                    applyClass('path', current);
+                } else {
+                    current = availableSquares[random(availableSquares.length)];
+                    applyClass('path', current);
+                }
+            } else {
+                console.log('dead end');
+                if(intersection === -1) {
+                    // then there's no solution
+                    console.log('no solution')
+                    break;
+                }
                 break;
             }
         }
-        console.log(used);
     }
 
     //solve(START, END)
     window.solve = solve;
+    window.squares = squares;
 })();
