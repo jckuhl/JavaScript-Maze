@@ -3,7 +3,6 @@
     "use strict"
 
     const maze = document.querySelector('.grid');
-    const squares = []
     // for testing add 51, 92, 93 (blocking intersections)
     const walls = [
         1, 2, 3, 4, 5, 6, 7, 8, 9, 
@@ -17,25 +16,46 @@
         83, 84, 85, 86, 87, 89,
         90, 91, 99
     ];
-    const START = 0;
+    const START = 60;
     const END = 19;
 
-    // build the maze
-    for(let i = 0; i < 100; i++) {
-        const square = document.createElement('div');
-        square.classList.add('square');
-        squares.push(square);
-        if(walls.includes(i)) {
-            square.classList.add('wall');
+    /**
+     * Builds a maze with predefined walls and a predefined size
+     *
+     * @param {Object} {maze, walls, start, end, width, height}
+     * @returns
+     */
+    function manualMazeBuilder({maze, walls, start, end, width, height}) {
+        maze.style.gridTemplateRows = `repeat(${height}, 1fr)`;
+        maze.style.gridTemplateColumns = `repeat(${width}, 1fr)`;
+        let size = height * width;
+        const squares = [];
+        for(let i = 0; i < size; i++) {
+            const square = document.createElement('div');
+            square.classList.add('square');
+            squares.push(square);
+            if(walls.includes(i)) {
+                square.classList.add('wall');
+            }
+            if(i === start) {
+                square.classList.add('start');
+            }
+            if(i === end) {
+                square.classList.add('end');
+            }
+            maze.appendChild(square);
         }
-        if(i === START) {
-            square.classList.add('start');
-        }
-        if(i === END) {
-            square.classList.add('end');
-        }
-        maze.appendChild(square);
+        return squares;
     }
+
+    const squares = manualMazeBuilder({
+        maze,
+        walls,
+        start: START,
+        end: END,
+        width: 10,
+        height: 10
+    });
 
     // solve the maze
     function solve(start, end) {
@@ -116,19 +136,19 @@
                 intersections.push(current);
                 let nextSquare;
                 // 1. if end is up and to the left
-                if(getRow(current, 10) > getRow(end, 10) && getColumn(current, 10) < getColumn(end, 10)) {
+                if(getRow(current, 10) > getRow(end, 10) && getColumn(current, 10) > getColumn(end, 10)) {
                     console.log('upleft');
                     nextSquare = availableSquares.find((square)=> {
                         return current - square === 10 || current - square === 1;
                     });
                 // 2. if end is on the same row and to the left
-                } else if(getRow(current, 10) === getRow(end, 10) && getColumn(current, 10) < getColumn(end, 10)) {
+                } else if(getRow(current, 10) === getRow(end, 10) && getColumn(current, 10) > getColumn(end, 10)) {
                     console.log('left');
                     nextSquare = availableSquares.find((square)=> {
                         return current - square === 1;
                     });
                 // 3. if end is down and to the left
-                } else if(getRow(current, 10) < getRow(end, 10) && getColumn(current, 10) < getColumn(end, 10)) {
+                } else if(getRow(current, 10) < getRow(end, 10) && getColumn(current, 10) > getColumn(end, 10)) {
                     console.log('downleft');
                     nextSquare = availableSquares.find((square)=> {
                         return current - square === -10 || current - square === 1;
@@ -140,19 +160,19 @@
                         return current - square === 10;
                     });
                 // 5. if down and to the right
-                } else if(getRow(current, 10) < getRow(end, 10) && getColumn(current, 10) > getColumn(end, 10)) {
+                } else if(getRow(current, 10) < getRow(end, 10) && getColumn(current, 10) < getColumn(end, 10)) {
                     console.log('downright');
                     nextSquare = availableSquares.find((square)=> {
                         return current - square === 10 || current - square === -1;
                     });
                 // 6. if same row and to the right
-                } else if(getRow(current, 10) === getRow(end, 10) && getColumn(current, 10) > getColumn(end, 10)) {
+                } else if(getRow(current, 10) === getRow(end, 10) && getColumn(current, 10) < getColumn(end, 10)) {
                     console.log('right');
                     nextSquare = availableSquares.find((square)=> {
                         return current - square === -1;
                     });
                 // 7. if up and to the right
-                } else if(getRow(current, 10) > getRow(end, 10) && getColumn(current, 10) > getColumn(end, 10)) {
+                } else if(getRow(current, 10) > getRow(end, 10) && getColumn(current, 10) < getColumn(end, 10)) {
                     console.log('upright');
                     nextSquare = availableSquares.find((square)=> {
                         return current - square === -10 || current - square === -1;
@@ -178,16 +198,17 @@
                     applyClass('path', current);
                 }
             } else {
-                console.log('dead end: ', intersections);
+                console.log('dead end: ', intersections, current);
                 if(intersections === []) {
                     // then there's no solution
                     console.log('no solution')
                     break;
                 }
                 let intersection = intersections.pop();
-                let invalids = used.slice(used.indexOf(intersection));  // minus 1?
+                let invalids = used.slice(used.indexOf(intersection - 1));  // minus 1?
                 invalids.forEach(invalid => squares[invalid].classList.add('invalid'));
                 current = intersection;
+                console.log(current);
             }
         }
         return current === end;
