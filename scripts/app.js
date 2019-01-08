@@ -114,42 +114,42 @@
                 // 1. if end is up and to the left
                 if(getRow(current) > getRow(end) && getColumn(current) < getColumn(end)) {
                     nextSquare = availableSquares.find((square)=> {
-                        return position - square === 10 || position - square === 1;
+                        return current - square === -10 || current - square === -1;
                     });
                 // 2. if end is on the same row and to the left
                 } else if(getRow(current) === getRow(end) && getColumn(current) < getColumn(end)) {
                     nextSquare = availableSquares.find((square)=> {
-                        return position - square === 1;
+                        return current - square === -1;
                     });
                 // 3. if end is down and to the left
                 } else if(getRow(current) < getRow(end) && getColumn(current) < getColumn(end)) {
                     nextSquare = availableSquares.find((square)=> {
-                        return position - square === -10 || position - square === 1;
+                        return current - square === 10 || current - square === -1;
                     });
                 // 4. if end is down and in the same column
                 } else if(getRow(current) < getRow(end) && getColumn(current) === getColumn(end)) {
                     nextSquare = availableSquares.find((square)=> {
-                        return position - square === 10;
+                        return current - square === -10;
                     });
                 // 5. if down and to the right
                 } else if(getRow(current) < getRow(end) && getColumn(current) > getColumn(end)) {
                     nextSquare = availableSquares.find((square)=> {
-                        return position - square === 10 || position - square === -1;
+                        return current - square === -10 || current - square === 1;
                     });
                 // 6. if same row and to the right
                 } else if(getRow(current) === getRow(end) && getColumn(current) > getColumn(end)) {
                     nextSquare = availableSquares.find((square)=> {
-                        return position - square === -1;
+                        return current - square === 1;
                     });
                 // 7. if up and to the right
                 } else if(getRow(current) > getRow(end) && getColumn(current) > getColumn(end)) {
                     nextSquare = availableSquares.find((square)=> {
-                        return position - square === -10 || position - square === -1;
+                        return current - square === 10 || current - square === 1;
                     });
                 // 8. if up and same column
                 } else if(getRow(current) > getRow(end) && getColumn(current) === getColumn(end)) {
                     nextSquare = availableSquares.find((square)=> {
-                        return position - square === -10;
+                        return current - square === 10;
                     });
                 }
 
@@ -174,7 +174,11 @@
         }
     }
 
+    document.getElementById('solve').addEventListener('click', solve.bind(null, START, END));
+    document.getElementById('clear').addEventListener('click', ()=> {
+        squares.filter(square => !square.classList.contains('wall')).forEach(square=> {
+            square.classList.remove('path');
+        });
+    });
     //solve(START, END)
-    window.solve = solve;
-    window.squares = squares;
 })();

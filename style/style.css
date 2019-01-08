@@ -5,6 +5,17 @@
     flex-direction: column;
 }
 
+.buttons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+button {
+    font-size: 1.25em;
+    margin: 1em 1em;
+}
+
 .grid {
     display: grid;
     grid-template-rows: repeat(10, 1fr);
